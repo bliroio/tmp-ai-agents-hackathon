@@ -1,0 +1,145 @@
+{
+  "questions": [
+    {
+      "id": "name",
+      "type": "text",
+      "question": "What's your name, fellow innovator?"
+    },
+    {
+      "id": "role",
+      "type": "multiple_choice",
+      "question": "What's your primary role in this hackathon?",
+      "options": [
+        "Full-Stack Developer",
+        "Frontend Developer",
+        "Backend Developer",
+        "DevOps Engineer",
+        "Data Scientist",
+        "UI/UX Designer",
+        "Product Manager",
+        "Mobile Developer",
+        "AI/ML Engineer",
+        "Other"
+      ]
+    },
+    {
+      "id": "aws_experience",
+      "type": "yes_no",
+      "question": "Have you worked with AWS services before?"
+    },
+    {
+      "id": "tech_stack",
+      "type": "multiple_choice",
+      "question": "What's your preferred tech stack?",
+      "options": [
+        "React + Node.js",
+        "Vue.js + Python",
+        "Angular + Java",
+        "Next.js + TypeScript",
+        "Flutter + Dart",
+        "React Native + JavaScript",
+        "Laravel + PHP",
+        "Django + Python",
+        "Spring Boot + Java",
+        "Express + JavaScript"
+      ]
+    },
+    {
+      "id": "hackathon_veteran",
+      "type": "yes_no",
+      "question": "Is this your first hackathon?"
+    },
+    {
+      "id": "project_idea",
+      "type": "text",
+      "question": "What's your brilliant project idea for this hackathon?"
+    },
+    {
+      "id": "aws_services",
+      "type": "multiple_choice",
+      "question": "Which AWS services are you most excited to use?",
+      "options": [
+        "Lambda",
+        "S3",
+        "EC2",
+        "DynamoDB",
+        "API Gateway",
+        "Cognito",
+        "SageMaker",
+        "RDS",
+        "CloudFront",
+        "Elastic Beanstalk"
+      ]
+    },
+    {
+      "id": "team_player",
+      "type": "yes_no",
+      "question": "Do you prefer working in teams or solo?"
+    },
+    {
+      "id": "innovation_focus",
+      "type": "multiple_choice",
+      "question": "What area of innovation excites you most?",
+      "options": [
+        "Artificial Intelligence",
+        "Cloud Computing",
+        "Mobile Development",
+        "Web3 & Blockchain",
+        "IoT & Hardware",
+        "Data Analytics",
+        "Cybersecurity",
+        "DevOps & Automation",
+        "AR/VR",
+        "Sustainability Tech"
+      ]
+    },
+    {
+      "id": "coding_style",
+      "type": "text",
+      "question": "Describe your coding style in one word:"
+    },
+    {
+      "id": "problem_solving",
+      "type": "multiple_choice",
+      "question": "How do you approach problem-solving?",
+      "options": [
+        "Research first, then code",
+        "Code first, debug later",
+        "Draw it out, then implement",
+        "Ask for help immediately",
+        "Break it into smaller pieces",
+        "Sleep on it"
+      ]
+    },
+    {
+      "id": "coffee_dependency",
+      "type": "yes_no",
+      "question": "Is coffee essential for your coding sessions?"
+    },
+    {
+      "id": "motivation",
+      "type": "text",
+      "question": "What motivates you to build amazing things?"
+    },
+    {
+      "id": "aws_challenge",
+      "type": "multiple_choice",
+      "question": "What's your biggest AWS challenge?",
+      "options": [
+        "Understanding pricing",
+        "Service selection",
+        "Security configuration",
+        "Scaling applications",
+        "Monitoring & logging",
+        "Cost optimization",
+        "Learning new services",
+        "Integration complexity"
+      ]
+    },
+    {
+      "id": "hackathon_goal",
+      "type": "text",
+      "question": "What do you hope to achieve in this hackathon?"
+    }
+  ]
+}

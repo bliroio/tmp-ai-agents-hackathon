@@ -1,0 +1,241 @@
+{
+  "app": {
+    "title": "Bliro Strands",
+    "subtitle": "Interactive Meeting Assistant",
+    "version": "1.0.0"
+  },
+  "flow": {
+    "steps": [
+      {
+        "id": "meeting_name",
+        "type": "text",
+        "title": "Meeting Setup",
+        "question": "What's the name of your meeting?",
+        "placeholder": "Enter meeting name...",
+        "validation": {
+          "required": true,
+          "minLength": 3
+        }
+      },
+      {
+        "id": "template_selection",
+        "type": "multiple_choice",
+        "title": "Template Selection",
+        "question": "Choose a meeting template:",
+        "options": [
+          {
+            "value": "standup",
+            "label": "Daily Standup",
+            "description": "Quick team sync with updates and blockers"
+          },
+          {
+            "value": "retrospective",
+            "label": "Sprint Retrospective",
+            "description": "Review what went well and what to improve"
+          },
+          {
+            "value": "planning",
+            "label": "Sprint Planning",
+            "description": "Plan upcoming sprint goals and tasks"
+          },
+          {
+            "value": "review",
+            "label": "Code Review",
+            "description": "Technical review of code changes"
+          },
+          {
+            "value": "brainstorm",
+            "label": "Brainstorming Session",
+            "description": "Creative ideation and problem solving"
+          },
+          {
+            "value": "custom",
+            "label": "Custom Meeting",
+            "description": "Create your own meeting structure"
+          }
+        ]
+      },
+      {
+        "id": "processing",
+        "type": "progress",
+        "title": "Processing Meeting",
+        "steps": [
+          {
+            "id": "analyzing_template",
+            "label": "Analyzing selected template",
+            "duration": 1500
+          },
+          {
+            "id": "generating_agenda",
+            "label": "Generating meeting agenda",
+            "duration": 2000
+          },
+          {
+            "id": "setting_up_backend",
+            "label": "Setting up backend services",
+            "duration": 1800
+          },
+          {
+            "id": "configuring_ai",
+            "label": "Configuring AI assistant",
+            "duration": 1200
+          },
+          {
+            "id": "preparing_meeting_room",
+            "label": "Preparing virtual meeting room",
+            "duration": 1000
+          },
+          {
+            "id": "finalizing_setup",
+            "label": "Finalizing meeting setup",
+            "duration": 800
+          }
+        ]
+      },
+      {
+        "id": "summary",
+        "type": "summary",
+        "title": "Meeting Summary",
+        "sections": [
+          {
+            "title": "Meeting Details",
+            "fields": ["meeting_name", "template_selection"]
+          },
+          {
+            "title": "Generated Agenda",
+            "content": "Based on your selected template, we've prepared a comprehensive agenda with relevant discussion points and time allocations."
+          },
+          {
+            "title": "AI Assistant Ready",
+            "content": "Your AI meeting assistant is configured and ready to help facilitate the meeting, take notes, and provide real-time insights."
+          },
+          {
+            "title": "Backend Services",
+            "content": "All backend services are running and ready to capture meeting data, generate transcripts, and provide post-meeting analytics."
+          }
+        ]
+      }
+    ]
+  },
+  "templates": {
+    "standup": {
+      "name": "Daily Standup",
+      "duration": "15 minutes",
+      "agenda": [
+        "What did you accomplish yesterday?",
+        "What will you work on today?",
+        "Are there any blockers or impediments?",
+        "Team announcements and updates"
+      ],
+      "ai_prompts": [
+        "Help team members stay focused on blockers",
+        "Suggest solutions for common impediments",
+        "Track progress patterns over time"
+      ]
+    },
+    "retrospective": {
+      "name": "Sprint Retrospective",
+      "duration": "60 minutes",
+      "agenda": [
+        "What went well this sprint?",
+        "What could be improved?",
+        "What should we start doing?",
+        "What should we stop doing?",
+        "Action items for next sprint"
+      ],
+      "ai_prompts": [
+        "Facilitate balanced discussion",
+        "Identify recurring themes",
+        "Help prioritize action items"
+      ]
+    },
+    "planning": {
+      "name": "Sprint Planning",
+      "duration": "90 minutes",
+      "agenda": [
+        "Review sprint goals and objectives",
+        "Estimate story points for user stories",
+        "Assign tasks to team members",
+        "Identify dependencies and risks",
+        "Confirm sprint capacity and timeline"
+      ],
+      "ai_prompts": [
+        "Help with story point estimation",
+        "Identify potential blockers early",
+        "Suggest optimal task distribution"
+      ]
+    },
+    "review": {
+      "name": "Code Review",
+      "duration": "45 minutes",
+      "agenda": [
+        "Review code changes and pull requests",
+        "Discuss architecture decisions",
+        "Identify potential issues or improvements",
+        "Share knowledge and best practices",
+        "Plan follow-up actions"
+      ],
+      "ai_prompts": [
+        "Highlight code quality issues",
+        "Suggest performance improvements",
+        "Ensure coding standards compliance"
+      ]
+    },
+    "brainstorm": {
+      "name": "Brainstorming Session",
+      "duration": "75 minutes",
+      "agenda": [
+        "Define the problem or challenge",
+        "Generate ideas without judgment",
+        "Group and categorize ideas",
+        "Evaluate and prioritize solutions",
+        "Create action plan for implementation"
+      ],
+      "ai_prompts": [
+        "Encourage creative thinking",
+        "Help organize and categorize ideas",
+        "Suggest evaluation criteria"
+      ]
+    },
+    "custom": {
+      "name": "Custom Meeting",
+      "duration": "Variable",
+      "agenda": [
+        "Custom agenda items will be generated based on your specific needs"
+      ],
+      "ai_prompts": [
+        "Adapt to your specific meeting style",
+        "Provide relevant suggestions",
+        "Maintain focus on your objectives"
+      ]
+    }
+  },
+  "messages": {
+    "welcome": "Welcome to Bliro Strands! Let's set up your meeting.",
+    "processing": "Setting up your meeting...",
+    "complete": "Meeting setup complete!",
+    "exit": "Press Enter to exit...",
+    "errors": {
+      "required_field": "This field is required",
+      "min_length": "Please enter at least {min} characters",
+      "invalid_selection": "Please select a valid option"
+    }
+  },
+  "ui": {
+    "colors": {
+      "primary": "#FF6B35",
+      "secondary": "yellow",
+      "success": "green",
+      "warning": "yellow",
+      "error": "red",
+      "info": "blue",
+      "text": "white",
+      "muted": "gray"
+    },
+    "spacing": {
+      "small": 1,
+      "medium": 2,
+      "large": 3
+    }
+  }
+}

@@ -13,47 +13,68 @@ const clearTerminal = () => {
   process.stdout.write("\x1B[2J\x1B[0f");
 };
 
-// Load questions from JSON file
+// Load configuration from JSON file
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const questionsData = JSON.parse(
-  readFileSync(join(__dirname, "data", "questions.json"), "utf8"),
+const configData = JSON.parse(
+  readFileSync(join(__dirname, "data", "config.json"), "utf8"),
 );
-const questions = questionsData.questions;
+const config = configData;
 
 // Raw mode will be handled by Ink automatically
 
 const App = () => {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [showResults, setShowResults] = useState(false);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [meetingData, setMeetingData] = useState({});
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [currentProgressStep, setCurrentProgressStep] = useState(0);
+  const [progressCompleted, setProgressCompleted] = useState(false);
 
-  // Component mounted
-  useEffect(() => {
-    // App is ready
-  }, []);
-
-  const currentQuestion = questions[currentQuestionIndex];
-  const isLastQuestion = currentQuestionIndex === questions.length - 1;
+  const flowSteps = config.flow.steps;
+  const currentStep = flowSteps[currentStepIndex];
+  const isLastStep = currentStepIndex === flowSteps.length - 1;
 
   const handleAnswer = (answer) => {
-    const newAnswers = {
-      ...answers,
-      [currentQuestion.id]: answer,
+    const newMeetingData = {
+      ...meetingData,
+      [currentStep.id]: answer,
     };
-    setAnswers(newAnswers);
+    setMeetingData(newMeetingData);
 
-    if (isLastQuestion) {
-      setIsLoading(true);
-      setTimeout(() => {
-        setIsLoading(false);
-        setShowResults(true);
-      }, 2000);
-    } else {
-      setCurrentQuestionIndex((prev) => prev + 1);
+    if (currentStep.id === "template_selection") {
+      // Move to processing step
+      setIsProcessing(true);
+      startProgressSteps();
+    } else if (currentStep.id === "meeting_name") {
+      // Move to template selection
+      setCurrentStepIndex((prev) => prev + 1);
     }
+  };
+
+  const startProgressSteps = () => {
+    const processingStep = flowSteps.find((step) => step.id === "processing");
+    const progressSteps = processingStep.steps;
+
+    let stepIndex = 0;
+    const processSteps = () => {
+      if (stepIndex < progressSteps.length) {
+        setCurrentProgressStep(stepIndex);
+        setTimeout(() => {
+          stepIndex++;
+          processSteps();
+        }, progressSteps[stepIndex].duration);
+      } else {
+        setProgressCompleted(true);
+        setTimeout(() => {
+          setIsProcessing(false);
+          setShowSummary(true);
+        }, 500);
+      }
+    };
+
+    processSteps();
   };
 
   const handleTextSubmit = () => {
@@ -63,33 +84,36 @@ const App = () => {
     }
   };
 
-  const handleYesNoSelect = (item) => {
+  const handleTemplateSelect = (item) => {
     handleAnswer(item.value);
   };
 
-  const handleMultipleChoiceSelect = (item) => {
-    handleAnswer(item.value);
-  };
+  const renderStep = () => {
+    if (!currentStep) return null;
 
-  const renderQuestion = () => {
-    if (!currentQuestion) return null;
-
-    const { type, question, options } = currentQuestion;
+    const { type, title, question, options, placeholder } = currentStep;
 
     return (
       <Box flexDirection="column" height="100%" width="100%">
-        <Text color="yellow" bold marginBottom={2} textAlign="center">
-          {chalk.bold(
-            `Question ${currentQuestionIndex + 1} of ${questions.length}`,
-          )}
+        <Text
+          color={config.ui.colors.secondary}
+          bold
+          marginBottom={2}
+          textAlign="center"
+        >
+          {chalk.bold(title)}
         </Text>
-        <Text color="white" marginBottom={3} textAlign="center">
+        <Text color={config.ui.colors.text} marginBottom={3} textAlign="center">
           {question}
         </Text>
 
         {type === "text" && (
           <Box flexDirection="column" width="100%">
-            <Text color="gray" marginBottom={2} textAlign="center">
+            <Text
+              color={config.ui.colors.muted}
+              marginBottom={2}
+              textAlign="center"
+            >
               Type your answer and press Enter:
             </Text>
             <Box width="60%">
@@ -99,24 +123,7 @@ const App = () => {
                 value={inputValue}
                 onChange={setInputValue}
                 onSubmit={handleTextSubmit}
-                placeholder="Your answer here..."
-              />
-            </Box>
-          </Box>
-        )}
-
-        {type === "yes_no" && (
-          <Box flexDirection="column" width="100%">
-            <Text color="gray" marginBottom={2} textAlign="center">
-              Select your answer:
-            </Text>
-            <Box width="40%">
-              <SelectInput
-                items={[
-                  { label: chalk.green("✓ Yes"), value: "yes" },
-                  { label: chalk.red("✗ No"), value: "no" },
-                ]}
-                onSelect={handleYesNoSelect}
+                placeholder={placeholder || "Your answer here..."}
               />
             </Box>
           </Box>
@@ -124,16 +131,20 @@ const App = () => {
 
         {type === "multiple_choice" && (
           <Box flexDirection="column" width="100%">
-            <Text color="gray" marginBottom={2} textAlign="center">
+            <Text
+              color={config.ui.colors.muted}
+              marginBottom={2}
+              textAlign="center"
+            >
               Choose an option:
             </Text>
-            <Box width="70%">
+            <Box width="80%">
               <SelectInput
                 items={options.map((option) => ({
-                  label: `• ${option}`,
-                  value: option,
+                  label: `• ${option.label}`,
+                  value: option.value,
                 }))}
-                onSelect={handleMultipleChoiceSelect}
+                onSelect={handleTemplateSelect}
               />
             </Box>
           </Box>
@@ -142,7 +153,11 @@ const App = () => {
     );
   };
 
-  const renderResults = () => {
+  const renderProgress = () => {
+    const processingStep = flowSteps.find((step) => step.id === "processing");
+    const progressSteps = processingStep.steps;
+    const currentStepData = progressSteps[currentProgressStep];
+
     return (
       <Box
         flexDirection="column"
@@ -150,40 +165,70 @@ const App = () => {
         height="100%"
         width="100%"
       >
-        <Text color="green" bold marginBottom={3} textAlign="center">
-          Quest Complete!
+        <Text
+          color={config.ui.colors.secondary}
+          bold
+          marginBottom={3}
+          textAlign="center"
+        >
+          {config.messages.processing}
         </Text>
-        <Text color="yellow" marginBottom={3} textAlign="center">
-          Your Discovery Profile:
-        </Text>
+
         <Box flexDirection="column" width="100%">
-          {Object.entries(answers).map(([questionId, answer]) => {
-            const question = questions.find((q) => q.id === questionId);
-            return (
-              <Box
-                key={questionId}
-                flexDirection="column"
-                marginY={1}
-                paddingX={2}
+          {progressSteps.map((step, index) => (
+            <Box
+              key={step.id}
+              flexDirection="row"
+              alignItems="center"
+              marginY={1}
+              paddingX={2}
+              gap={2}
+            >
+              <Text
+                color={
+                  index <= currentProgressStep
+                    ? config.ui.colors.success
+                    : config.ui.colors.muted
+                }
+                marginRight={2}
               >
-                <Text color="blue" textAlign="center" marginBottom={1}>
-                  {question.question}
-                </Text>
-                <Text color="white" textAlign="center" marginBottom={2}>
-                  → {answer}
-                </Text>
-              </Box>
-            );
-          })}
+                {index < currentProgressStep ? (
+                  "✓"
+                ) : index === currentProgressStep ? (
+                  <Spinner type="dots" />
+                ) : (
+                  "○"
+                )}
+              </Text>
+              <Text
+                color={
+                  index <= currentProgressStep
+                    ? config.ui.colors.text
+                    : config.ui.colors.muted
+                }
+              >
+                {step.label}
+              </Text>
+            </Box>
+          ))}
         </Box>
-        <Text color="gray" marginTop={3} textAlign="center">
-          Press Enter to exit...
-        </Text>
+
+        {progressCompleted && (
+          <Text
+            color={config.ui.colors.success}
+            marginTop={3}
+            textAlign="center"
+          >
+            {config.messages.complete}
+          </Text>
+        )}
       </Box>
     );
   };
 
-  const renderLoading = () => {
+  const renderSummary = () => {
+    const selectedTemplate = config.templates[meetingData.template_selection];
+
     return (
       <Box
         flexDirection="column"
@@ -191,15 +236,117 @@ const App = () => {
         height="100%"
         width="100%"
       >
-        <Text color="yellow" textAlign="center">
-          <Spinner type="dots" /> Analyzing your profile...
+        <Text
+          color={config.ui.colors.success}
+          bold
+          marginBottom={3}
+          textAlign="center"
+        >
+          Meeting Setup Complete!
+        </Text>
+
+        <Box flexDirection="column" width="100%">
+          <Box flexDirection="column" marginY={2} paddingX={2}>
+            <Text
+              color={config.ui.colors.info}
+              bold
+              textAlign="center"
+              marginBottom={1}
+            >
+              Meeting Details
+            </Text>
+            <Text
+              color={config.ui.colors.text}
+              textAlign="center"
+              marginBottom={1}
+            >
+              Name: {meetingData.meeting_name}
+            </Text>
+            <Text
+              color={config.ui.colors.text}
+              textAlign="center"
+              marginBottom={2}
+            >
+              Template: {selectedTemplate?.name}
+            </Text>
+          </Box>
+
+          <Box flexDirection="column" marginY={2} paddingX={2}>
+            <Text
+              color={config.ui.colors.info}
+              bold
+              textAlign="center"
+              marginBottom={1}
+            >
+              Generated Agenda
+            </Text>
+            <Text
+              color={config.ui.colors.text}
+              textAlign="center"
+              marginBottom={2}
+            >
+              Duration: {selectedTemplate?.duration}
+            </Text>
+            {selectedTemplate?.agenda.map((item, index) => (
+              <Text
+                key={index}
+                color={config.ui.colors.muted}
+                textAlign="center"
+                marginBottom={1}
+              >
+                • {item}
+              </Text>
+            ))}
+          </Box>
+
+          <Box flexDirection="column" marginY={2} paddingX={2}>
+            <Text
+              color={config.ui.colors.info}
+              bold
+              textAlign="center"
+              marginBottom={1}
+            >
+              AI Assistant Ready
+            </Text>
+            <Text
+              color={config.ui.colors.text}
+              textAlign="center"
+              marginBottom={2}
+            >
+              Your AI meeting assistant is configured and ready to help
+              facilitate the meeting.
+            </Text>
+          </Box>
+
+          <Box flexDirection="column" marginY={2} paddingX={2}>
+            <Text
+              color={config.ui.colors.info}
+              bold
+              textAlign="center"
+              marginBottom={1}
+            >
+              Backend Services
+            </Text>
+            <Text
+              color={config.ui.colors.text}
+              textAlign="center"
+              marginBottom={2}
+            >
+              All backend services are running and ready to capture meeting
+              data.
+            </Text>
+          </Box>
+        </Box>
+
+        <Text color={config.ui.colors.muted} marginTop={3} textAlign="center">
+          {config.messages.exit}
         </Text>
       </Box>
     );
   };
 
   useInput((input, key) => {
-    if (showResults && key.return) {
+    if (showSummary && key.return) {
       process.exit(0);
     }
   });
@@ -226,10 +373,8 @@ const App = () => {
           justifyContent="center"
           alignItems="center"
         >
-          <Text color="#FF6B35">Bliro Quest</Text>
-          <Text color="gray">
-            AWS Hackathon - Interactive Discovery Platform
-          </Text>
+          <Text color={config.ui.colors.primary}>{config.app.title}</Text>
+          <Text color={config.ui.colors.muted}>{config.app.subtitle}</Text>
         </Box>
 
         <Box flexGrow={1} flexDirection="column" alignItems="center">
@@ -240,20 +385,19 @@ const App = () => {
             width="80%"
             minHeight={20}
           >
-            {isLoading
-              ? renderLoading()
-              : showResults
-              ? renderResults()
-              : renderQuestion()}
+            {isProcessing
+              ? renderProgress()
+              : showSummary
+              ? renderSummary()
+              : renderStep()}
           </Box>
         </Box>
 
         {/* Footer Section */}
-        {!showResults && !isLoading && (
+        {!showSummary && !isProcessing && (
           <Box marginTop={2} justifyContent="center">
-            <Text color="gray">
-              Progress: {currentQuestionIndex + 1}/{questions.length} questions
-              completed
+            <Text color={config.ui.colors.muted}>
+              Step: {currentStepIndex + 1} of {flowSteps.length - 1}
             </Text>
           </Box>
         )}
